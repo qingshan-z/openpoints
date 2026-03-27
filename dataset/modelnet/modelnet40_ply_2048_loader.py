@@ -3,6 +3,7 @@ Reference: https://github.com/lightaime/deep_gcns_torch/tree/master/examples/cla
 """
 import os
 import glob
+import json
 import h5py
 import numpy as np
 import pickle
@@ -121,6 +122,22 @@ class ModelNet40Ply2048(Dataset):
         self.partition = 'train' if split.lower() == 'train' else 'test'  # val = test
         self.data, self.label = load_data(data_dir, self.partition, self.url)
         self.num_points = num_points
+        num_classes = int(np.max(self.label)) + 1
+        default_classes = list(type(self).classes)
+        if len(default_classes) == num_classes:
+            self.classes = default_classes
+        else:
+            classes = [str(i) for i in range(num_classes)]
+            mapping_path = os.path.join(os.path.dirname(__file__), 'label_mapping.json')
+            if os.path.exists(mapping_path):
+                with open(mapping_path, 'r', encoding='utf-8') as f:
+                    mapping = json.load(f)
+                if isinstance(mapping, dict):
+                    for name, index in mapping.items():
+                        idx = int(index)
+                        if 0 <= idx < num_classes:
+                            classes[idx] = str(name)
+            self.classes = classes
         logging.info(f'==> sucessfully loaded {self.partition} data')
         self.transform = transform
 
@@ -148,6 +165,24 @@ class ModelNet40Ply2048(Dataset):
     @property
     def num_classes(self):
         return np.max(self.label) + 1
+
+
+@DATASETS.register_module()
+class ScanNetMyselfH5(ModelNet40Ply2048):
+    classes = []
+
+    def __init__(self,
+                 num_points=2048,
+                 data_dir="./openpoints/owndata",
+                 split='train',
+                 transform=None
+                 ):
+        super().__init__(
+            num_points=num_points,
+            data_dir=data_dir,
+            split=split,
+            transform=transform,
+        )
 
     """ for visulalization
     from openpoints.dataset import vis_multi_points
