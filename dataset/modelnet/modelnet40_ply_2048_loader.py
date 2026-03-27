@@ -133,8 +133,15 @@ class ModelNet40Ply2048(Dataset):
                 with open(mapping_path, 'r', encoding='utf-8') as f:
                     mapping = json.load(f)
                 if isinstance(mapping, dict):
+                    mapping_indices = sorted({int(v) for v in mapping.values()})
+                    has_unknown_zero = 'UNKNOWN' in mapping and int(mapping['UNKNOWN']) == 0
+                    shift_unknown = has_unknown_zero and num_classes == len(mapping_indices) - 1
                     for name, index in mapping.items():
                         idx = int(index)
+                        if shift_unknown:
+                            if idx == 0:
+                                continue
+                            idx = idx - 1
                         if 0 <= idx < num_classes:
                             classes[idx] = str(name)
             self.classes = classes
