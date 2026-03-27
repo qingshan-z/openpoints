@@ -53,7 +53,7 @@ def load_data(data_dir, partition, url):
         all_data.append(data)
         all_label.append(label)
     all_data = np.concatenate(all_data, axis=0)
-    all_label = np.concatenate(all_label, axis=0).squeeze(-1)
+    all_label = np.concatenate(all_label, axis=0).reshape(-1)
     return all_data, all_label
 
 
