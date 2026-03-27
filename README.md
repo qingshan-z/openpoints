@@ -15,7 +15,7 @@ OpenPoints currently supports reproducing the following models:
 - Pix4Point
 - PointVector
 
-- Mamba3d
+- Mamba3d 测试
 
 
 
